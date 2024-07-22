@@ -26,16 +26,16 @@ totalPeriod=8
 ##File handling
 #Convert from & to csv & json
 #csv teach
-def ConvertToCSVTeach(folderPath,fileName,rowHeadings=['subj','classes','Leave']):
+def ConvertToCSVTeach(folderPath,fileName,TeachersData,rowHeadings=['subj','classes','Leave']):
     csv_file=folderPath+fileName+'.csv'
     with open(csv_file,'w',newline='') as fc:
         Mrwriter=csv.writer(fc)
         Mrwriter.writerow(['TEACHERS']+rowHeadings)
 
-        for k in Teachers:
+        for k in TeachersData:
             Li=[]
             for i in rowHeadings:
-                Li.append(Teachers[k][i])
+                Li.append(TeachersData[k][i])
             Mrwriter.writerow([k]+Li)
 
 def ConvertFromCSVTeach(folderPath,fileName,rowHeadings=['subj','classes','Leave']):
@@ -45,24 +45,41 @@ def ConvertFromCSVTeach(folderPath,fileName,rowHeadings=['subj','classes','Leave
             Teachers_dict={}
             for index,values in enumerate(Mrreader):
                 if index!=0:
-                    Teachers_dict[values[0]]=dict(zip(rowHeadings,values[1:]))
+                    Teachers_dict[values[0]]=dict(zip(rowHeadings,[values[1],eval(values[2]),eval(values[3])]))
             return Teachers_dict
 #csv class                 
-def ConvertToCSVClass(folderPath,fileName):
+def ConvertToCSVClass(folderPath,fileName,ClassesData):
     csv_file=folderPath+fileName+'.csv'
     with open(csv_file,'w',newline='') as fc:
         Mrwriter=csv.writer(fc)
-        for curr_class in Classes:
+        for curr_class in ClassesData:
             Mrwriter.writerow(['Class:',curr_class])
-            curr_class_data=Classes[curr_class]
+            curr_class_data=ClassesData[curr_class]
             for curr_day in curr_class_data:
                 Mrwriter.writerow([curr_day]+curr_class_data[curr_day])
-
-ConvertToCSVClass('C:/Users/radin/Documents/Adi light/Code/school-time-table/csv/','ClassesData')
+def ConvertFromCSVClass(folderPath,fileName):
+        csv_file=folderPath+fileName+'.csv'
+        with open(csv_file,'r',newline='') as fc:
+            Mrreader=csv.reader(fc)
+            Classess_dict={}
+            curr_class_timetable={}
+            curr_class=''
+            for values in Mrreader:
+                
+                if values[0].lower()=="class:":
+                    curr_class=values[1]
+                    Classess_dict[curr_class]={'M':[],'T':[],'W':[],'TH':[],'F':[],'S':[]}
+                else:
+                    
+                    Classess_dict[curr_class][values[0]]=values[1:]
+            return Classess_dict
+# ConvertToCSVClass('C:/Users/radin/Documents/Adi light/Code/school-time-table/csv/','ClassesData')
+# ConvertFromCSVClass('C:/Users/radin/Documents/Adi light/Code/school-time-table/csv/','ClassesData')
 ##  Algos
 # 1.class-teachers time table = Assign teachers to class time table(primary) 
 def ClassTeacherTimetable(Classesdata):
     #Assigns teachers and produces TEACHERS ASSIGNED TABLE for the classses based on teachers table and classes table
+    
     Classes_Teacher_table_Copy = Classesdata.copy()
     for one_class in Classes_Teacher_table_Copy:
         #get one class data
@@ -70,6 +87,7 @@ def ClassTeacherTimetable(Classesdata):
         for Teach_name in Teachers:
             #get one teachers data
             Teach_data = Teachers[Teach_name]
+            
             if one_class in Teach_data['classes']:
                 #check if this class is habdled by this teach
                 for day in Class_data:
@@ -79,15 +97,17 @@ def ClassTeacherTimetable(Classesdata):
             
                     for subj_ind in range(len(Day_timetable)):
                         #get subjects index of that timetable
-                        
+                        # print("-"*10,Day_timetable[subj_ind])
                         if Teach_data['subj'] in Day_timetable[subj_ind]:
                             #checks if this teachers subj in that day's timetable
                             Day_timetable[subj_ind]=Teach_name
+                            
                         # just subjs are printed if it is yet to assign
+    
     return Classes_Teacher_table_Copy
 
 # 2.Teachers-class time table = Assign class to teachers (primary)
-
+# print("new:",ClassTeacherTimetable(Classes))
 def createTeachClassedTimetableTempl(TeachersDict):
     Teach_Classes_timetable={}
     for Teach_name in TeachersDict:
@@ -101,9 +121,11 @@ def createTeachClassedTimetableTempl(TeachersDict):
     return Teach_Classes_timetable
 
 def TeacherClassTimetable(TeachersData,ClassesData):
+    
     Teach_classes_format_original = createTeachClassedTimetableTempl(TeachersData)
     Teach_classes_format =Teach_classes_format_original.copy()
     Classes_Teacher_table_Copy = ClassTeacherTimetable(ClassesData).copy()
+   
     for Teacher in Teach_classes_format:
         Teachers_data= Teach_classes_format[Teacher]
         for day in Teachers_data:
@@ -122,9 +144,12 @@ def TeacherClassTimetable(TeachersData,ClassesData):
 def SubstitutionTimeTablesHandler(TeachersData,ClassesData):
     Teachers = TeachersData
     Classes = ClassesData
-    Teachers_class_timetable = TeacherClassTimetable(Teachers,Classes).copy()
+    # print("TEACERS",TeachersData==Teachers,'\n\n',"*"*100,Classes,'\n\n')
+    Teachers_class_timetable = TeacherClassTimetable(TeachersData,ClassesData).copy()
     Class_Teachers_timetable = ClassTeacherTimetable(Classes).copy()
+    
     Substitution_adjusted_teachers_table={}
+    Substitution_adjusted_classesforTeachers_table={}
     for teach_id in Teachers:
         teach_data = Teachers[teach_id]
         teach_subj = teach_data['subj']
@@ -133,6 +158,7 @@ def SubstitutionTimeTablesHandler(TeachersData,ClassesData):
         if len(Leave_days)>0:
             one_leave_teacher= teach_id
             leave_teach_class_data = Teachers_class_timetable[one_leave_teacher]
+           
             for Leave_day in Leave_days:
                 teach_leaveday_classes=leave_teach_class_data[Leave_day]
                 eligible_free_teachers={}#for this day
@@ -219,16 +245,16 @@ def SubstitutionTimeTablesHandler(TeachersData,ClassesData):
                         #SELECTION if one teacher is selected for one period the next period should not have them   
 
                         # print(Final_selectionOf_teachers,len(Final_selectionOf_teachers))  
-                        print(period_i,end=" : ") 
+                        
                         if period_i == 0:#start
-                            print(sorted_eligibal_teach)
+                           
                             Final_selectionOf_teachers[period_i]=(sorted_eligibal_teach[0][0])
                             
                         else:#mid & last
                             
                             k=0
                             
-                            print(sorted_eligibal_teach)
+                          
                             while True:
                                 #checking if pre period also has same teacher
                                 bool_sameTeach_PrePeriod=False
@@ -257,38 +283,50 @@ def SubstitutionTimeTablesHandler(TeachersData,ClassesData):
                 for Leave_class_ind in range(len(teach_leaveday_classes)):
                     Specific_class_name = teach_leaveday_classes[Leave_class_ind]
                     if Specific_class_name!='free':
-                        print(Specific_class_name)
                         print("original")
                         print("Changed")
                         print(Class_Teachers_timetable[Specific_class_name][Leave_day])
                         Class_Teachers_timetable[Specific_class_name][Leave_day][Leave_class_ind]=Final_selectionOf_teachers[Leave_class_ind]
                         print(Class_Teachers_timetable[Specific_class_name][Leave_day])
-                        print("-"*10)
+                        
                 #teacher-class
                 Substitution_adjusted_teachers_table=TeacherClassTimetable(Teachers,Class_Teachers_timetable)
-    # return [Substitution_adjusted_teachers_table,Class_Teachers_timetable]
-    subsTeach_data,subsClass_data=Substitution_adjusted_teachers_table,Class_Teachers_timetable
-def Button_fn1():
-    teachdata=TeachersData_fromfile if TeachersData_fromfile!=False else Teachers
-    classdata=ClassesData_fromfile if ClassesData_fromfile!=False else Classes
-    SubstitutionTimeTablesHandler(teachdata,classdata)
+                Substitution_adjusted_classesforTeachers_table=ClassTeacherTimetable(Class_Teachers_timetable)
+    
+    return [Substitution_adjusted_teachers_table,Class_Teachers_timetable]
+
 #TK fns
+def Button_fn1():
+    TeachersData_fromfile = ConvertFromCSVTeach('C:/Users/radin/Documents/Adi light/Code/school-time-table/csv/','TeachersData')
+    ClassesData_fromfile = ConvertFromCSVClass('C:/Users/radin/Documents/Adi light/Code/school-time-table/csv/','ClassesData')
+
+    SubsAdj_teach_timetable,SubsAdj_class_timetable=SubstitutionTimeTablesHandler(TeachersData_fromfile,Classes)
+    print("+"*100,SubsAdj_teach_timetable)
+    ConvertToCSVTeach('C:/Users/radin/Documents/Adi light/Code/school-time-table/csv/Subs/','SubsTeachersData',SubsAdj_teach_timetable,rowHeadings=days)
+    ConvertToCSVClass('C:/Users/radin/Documents/Adi light/Code/school-time-table/csv/Subs/','SubsDailyTeachersData',SubsAdj_teach_timetable)
+    ConvertToCSVClass('C:/Users/radin/Documents/Adi light/Code/school-time-table/csv/Subs/','SubsClassesData',SubsAdj_class_timetable)
+    messagebox.showinfo("Success","Check the csv in the Subs folder")
+
+
 def Button_fn2():
-    response = messagebox.askyesno("Are you sure?","Do you want the values to be replaced by a default TEMPLATE")
+    response = messagebox.askyesno("Are you sure?","Do you want the Teacher.csv values to be replaced by a default TEMPLATE")
     if response:
-        ConvertToCSVTeach('C:/Users/radin/Documents/Adi light/Code/school-time-table/csv/','TeachersData',['subj','classes','Leave'])
+        ConvertToCSVTeach('C:/Users/radin/Documents/Adi light/Code/school-time-table/csv/','TeachersData',Teachers)
+
 def Button_fn3():
-    global TeachersData_fromfile
-    TeachersData_fromfile = ConvertFromCSVTeach('C:/Users/radin/Documents/Adi light/Code/school-time-table/csv/','TeachersData',['subj','classes','Leave'])
-    messagebox.showinfo("Success","read CSV successfully")
+    response = messagebox.askyesno("Are you sure?","Do you want the ClassesData.csv values to be replaced by a default TEMPLATE")
+    if response:
+        ConvertToCSVClass('C:/Users/radin/Documents/Adi light/Code/school-time-table/csv/','ClassesData',Classes)
 
 #TK GUI
 space=50
+Cx,Cy=win_dime/3,win_dime/3 #<- 3rd  button's x & y
 B1 = Button(top, text ="Put Substitutions", command = Button_fn1)
-B1.place(x=win_dime/3,y=win_dime/2-space)
-B2 = Button(top, text ="Reset teach csv", command =Button_fn2)
-B2.place(x=win_dime/3,y=win_dime/2)
-B2 = Button(top, text ="use teach.csv values", command =Button_fn3)
-B2.place(x=win_dime/3,y=win_dime/2+space)
+B2 = Button(top, text ="Reset TeachersData.csv", command =Button_fn2)
+B3 = Button(top, text ="Reset ClassesData.csv", command =Button_fn3)
+
+B1.place(x=Cx,y=Cy-space)
+B2.place(x=Cx,y=Cy)
+B3.place(x=Cx,y=Cy+space)
 top.mainloop()
 # B2 = Button(top, text ="Reset teach csv", command =lambda:ConvertToCSVTeach('C:/Users/radin/Documents/Adi light/Code/school-time-table/csv/','TeachersData',['subj','classes','Leave']))

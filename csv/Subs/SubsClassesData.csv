@@ -1,0 +1,21 @@
+Class:,A12
+M,janani,sripriya,sripriya,sowmiya,cvr,buvaneshwari_g,LAB1 ,LAB1
+T,sowmiya,sripriya,gayatri_ramachandran,gayatri_ramachandran,cvr,buvaneshwari_g,LAB1 ,LAB1
+W,buvaneshwari_g,sripriya,sowmiya,sowmiya,cvr,gayatri_ramachandran,LAB3 ,LAB3
+TH,buvaneshwari_g,sripriya,sowmiya,cvr,sowmiya,gayatri_ramachandran,LAB3 ,LAB3
+F,buvaneshwari_g,sripriya,cvr,sripriya,gayatri_ramachandran,gayatri_ramachandran,buvaneshwari_g
+S,saraswathi,sripriya,sowmiya,buvaneshwari_g,cvr
+Class:,B12
+M,aruna,E,divya,buvaneshwari_g,divya,ellamal,LAB3,LAB3
+T,divya,aruna,buvaneshwari_g,E,buvaneshwari_g,aruna,LAB3,LAB3
+W,gayatri_ramachandran,aruna,buvaneshwari_g,buvaneshwari_g,divya,E,E,gayatri_ramachandran
+TH,E,gayatri_ramachandran,aruna,divya,saraswathi,buvaneshwari_g,divya,gayatri_ramachandran
+F,divya,aruna,buvaneshwari_g,aruna,GS,divya,LAB1,LAB1
+S,divya,gayatri_ramachandran,E,LAB1,LAB1
+Class:,C12
+M,divya,gayatri_vp,sowmiya,gayatri_vp,janani,gayatri_vp,gayathri_narashiman,divya
+T,janani,gayatri_vp,GS,divya,sowmiya,gayathri_narashiman,janani,sowmiya
+W,divya,gayatri_vp,gayathri_narashiman,janani,sowmiya,divya,gayatri_vp,gayatri_vp
+TH,sowmiya,gayatri_vp,gayathri_narashiman,janani,divya,gayatri_vp,gayatri_vp,gayatri_vp
+F,janani,gayatri_vp,divya,gayathri_narashiman,janani,sowmiya,gayatri_vp,gayatri_vp
+S,sowmiya,divya,gayathri_narashiman,gayatri_vp,gayatri_vp
