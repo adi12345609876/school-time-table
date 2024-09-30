@@ -1,12 +1,12 @@
-import pandas as pd
 import json
 import csv
 from tkinter import *
 from tkinter import messagebox
-#Tk intitial
-win_dime=500
-top = Tk()
-top.geometry(f"{win_dime}x{win_dime}")
+from tkinter import ttk
+import pandas as pd
+import matplotlib.pyplot as plt
+from matplotlib.backends.backend_pdf import PdfPages
+
 ##  data one week
 #Table1 - class table
 Classes={
@@ -18,6 +18,7 @@ Classes={
 #Table2 - teachers table
 Teachers={'sowmiya':{'subj':'M','classes':['A12','C12'],'Leave':[]},'gayatri_vp':{'subj':'B','classes':['C12'],'Leave':[]},'divya':{'subj':'P','classes':['C12','B12'],'Leave':[]},'janani':{'subj':'C','classes':['C12'],'Leave':[]},'gayathri_narashiman':{'subj':'E','classes':['C12'],'Leave':[]},'ellamal':{'subj':'PT','classes':['C12','B12'],'Leave':[]},'saraswathi':{'subj':'LIB','classes':['C12','A12','B12'],'Leave':[]},'cvr':{'subj':'E','classes':['A12'],'Leave':[]},'aruna':{'subj':'M','classes':['B12'],'Leave':[]},'sripriya':{'subj':'P','classes':['A12'],'Leave':[]},'buvaneshwari_g':{'subj':'CS','classes':['A12','B12'],'Leave':[]},'gayatri_ramachandran':{'subj':'C','classes':['A12','B12'],'Leave':['M']},}
 days=['M','T','W','TH','F','S']
+Other_subj={'LAB1':['P','C'],'LAB2':['B'],'LAB3':['M','CS']}
 TeachersData_fromfile={}
 ClassesData_fromfile={}
 subsTeach_data,subsClass_data={},{}
@@ -98,9 +99,14 @@ def ClassTeacherTimetable(Classesdata):
                     for subj_ind in range(len(Day_timetable)):
                         #get subjects index of that timetable
                         # print("-"*10,Day_timetable[subj_ind])
-                        if Teach_data['subj'] in Day_timetable[subj_ind]:
+                        if Teach_data['subj'] == Day_timetable[subj_ind]:
+                            # print("Day",Day_timetable[subj_ind],"Teach",Teach_data['subj'])
                             #checks if this teachers subj in that day's timetable
                             Day_timetable[subj_ind]=Teach_name
+                        # elif Day_timetable[subj_ind] in Other_subj:
+                        #     respctive_subj=Other_subj[Day_timetable[subj_ind]]
+                        #     for lab_subjects in respctive_subj: 
+                        #         print(respctive_subj,Day_timetable[subj_ind])
                             
                         # just subjs are printed if it is yet to assign
     
@@ -158,6 +164,7 @@ def SubstitutionTimeTablesHandler(TeachersData,ClassesData):
         if len(Leave_days)>0:
             one_leave_teacher= teach_id
             leave_teach_class_data = Teachers_class_timetable[one_leave_teacher]
+            
            
             for Leave_day in Leave_days:
                 teach_leaveday_classes=leave_teach_class_data[Leave_day]
@@ -270,7 +277,8 @@ def SubstitutionTimeTablesHandler(TeachersData,ClassesData):
                        
                         print("-"*10)                         
                        
-                print("\nFINAL SELECTION:",Final_selectionOf_teachers,'\n')                     
+                print("\nFINAL SELECTION:",Final_selectionOf_teachers)         
+                print('Teacher to be Subs:',one_leave_teacher,'\n')            
                         
 
                 #UPDATE & REPLACE & GENERATE
@@ -283,9 +291,9 @@ def SubstitutionTimeTablesHandler(TeachersData,ClassesData):
                 for Leave_class_ind in range(len(teach_leaveday_classes)):
                     Specific_class_name = teach_leaveday_classes[Leave_class_ind]
                     if Specific_class_name!='free':
-                        print("original")
-                        print("Changed")
+                        print("original:",end="")
                         print(Class_Teachers_timetable[Specific_class_name][Leave_day])
+                        print("Changed:",end="")
                         Class_Teachers_timetable[Specific_class_name][Leave_day][Leave_class_ind]=Final_selectionOf_teachers[Leave_class_ind]
                         print(Class_Teachers_timetable[Specific_class_name][Leave_day])
                         
@@ -294,39 +302,108 @@ def SubstitutionTimeTablesHandler(TeachersData,ClassesData):
                 Substitution_adjusted_classesforTeachers_table=ClassTeacherTimetable(Class_Teachers_timetable)
     
     return [Substitution_adjusted_teachers_table,Class_Teachers_timetable]
+#Create a pdf from the SubClassesDatatable 
+def csv_to_pdf_SubClasses(csv_file_path, pdf_file_path):
+    # Read the CSV file into a DataFrame
+    rowsToSkip=[]
+    classNames=[]
+    rows=[]
+    header=['S/P','1','2','3','4','5','6','7','8']
+    with open(csv_file_path,'r',newline='') as fc:
+        fr=csv.reader(fc)
+        ci=0
+        for i in fr:
+            print(i)
+            if len(i)<4:
+                rowsToSkip.append(ci)
+                classNames.append(i[1])
+            else:
+                if 4<len(i)<9:
+                    rows.append([*i,'','',''])
+                else:
+                    rows.append(i)
+            ci+=1
+    print(classNames,rowsToSkip,rows)
+
+    
+    
+    # Create a PDF file to save the tables
+    with PdfPages(pdf_file_path) as pdf:
+        # Create the first figure for the first table
+        for i in range(len(classNames)):
+            fig, ax= plt.subplots(figsize=(8, 6))  # Adjust size as needed
+            ax.axis('tight')
+            ax.axis('off')
+            
+            # Create the first table
+            if i==0:
+                ax.table(cellText=rows[:5+1], colLabels=header, cellLoc='center', loc='center')
+            else:
+                st,en=i*5,5+i*5
+                ax.table(cellText=rows[st+1:en+2], colLabels=header, cellLoc='center', loc='center')
+          
+
+            ax.set_title(classNames[i], fontweight="bold")
+
+            # Save the first table to the PDF
+            pdf.savefig(fig)
+            plt.close(fig)  # Close the figure to free memory
+
+      
+
+    print(f"Successfully created a PDF with two tables from {csv_file_path} on separate pages.")
 
 #TK fns
-def Button_fn1():
-    TeachersData_fromfile = ConvertFromCSVTeach('C:/Users/radin/Documents/Adi light/Code/school-time-table/csv/','TeachersData')
-    ClassesData_fromfile = ConvertFromCSVClass('C:/Users/radin/Documents/Adi light/Code/school-time-table/csv/','ClassesData')
+def Button_gen():
+    TeachersData_fromfile = ConvertFromCSVTeach('./csv/','TeachersData')
+    ClassesData_fromfile = ConvertFromCSVClass('./csv/','ClassesData')
 
     SubsAdj_teach_timetable,SubsAdj_class_timetable=SubstitutionTimeTablesHandler(TeachersData_fromfile,Classes)
-    print("+"*100,SubsAdj_teach_timetable)
-    ConvertToCSVTeach('C:/Users/radin/Documents/Adi light/Code/school-time-table/csv/Subs/','SubsTeachersData',SubsAdj_teach_timetable,rowHeadings=days)
-    ConvertToCSVClass('C:/Users/radin/Documents/Adi light/Code/school-time-table/csv/Subs/','SubsDailyTeachersData',SubsAdj_teach_timetable)
-    ConvertToCSVClass('C:/Users/radin/Documents/Adi light/Code/school-time-table/csv/Subs/','SubsClassesData',SubsAdj_class_timetable)
+    # print("+"*100,SubsAdj_teach_timetable)
+    ConvertToCSVTeach('./csv/Final Subs/','SubsTeachersData',SubsAdj_teach_timetable,rowHeadings=days)
+    ConvertToCSVClass('./csv/Final Subs/','SubsDailyTeachersData',SubsAdj_teach_timetable)
+    ConvertToCSVClass('./csv/Final Subs/','SubsClassesData',SubsAdj_class_timetable)
     messagebox.showinfo("Success","Check the csv in the Subs folder")
 
 
 def Button_fn2():
     response = messagebox.askyesno("Are you sure?","Do you want the Teacher.csv values to be replaced by a default TEMPLATE")
     if response:
-        ConvertToCSVTeach('C:/Users/radin/Documents/Adi light/Code/school-time-table/csv/','TeachersData',Teachers)
+        ConvertToCSVTeach('./csv/','TeachersData',Teachers)
 
 def Button_fn3():
     response = messagebox.askyesno("Are you sure?","Do you want the ClassesData.csv values to be replaced by a default TEMPLATE")
     if response:
-        ConvertToCSVClass('C:/Users/radin/Documents/Adi light/Code/school-time-table/csv/','ClassesData',Classes)
+        ConvertToCSVClass('./csv/','ClassesData',Classes)
 
-#TK GUI
-space=50
-Cx,Cy=win_dime/3,win_dime/3 #<- 3rd  button's x & y
-B1 = Button(top, text ="Put Substitutions", command = Button_fn1)
-B2 = Button(top, text ="Reset TeachersData.csv", command =Button_fn2)
-B3 = Button(top, text ="Reset ClassesData.csv", command =Button_fn3)
+#Tk intitial
+def startTK():
+    win_dime=500
+    top = Tk()
+    top.geometry(f"{win_dime}x{win_dime}")
+    top.title("Substitution Teacher handler")
+    # Style configuration
+    style = ttk.Style()
+    style.configure('TButton', font=('Helvetica', 12), padding=10)
+    style.map('TButton', background=[('active', '#ff9999'), ('!disabled', '#ff6666')])
 
-B1.place(x=Cx,y=Cy-space)
-B2.place(x=Cx,y=Cy)
-B3.place(x=Cx,y=Cy+space)
-top.mainloop()
+    space=80
+    BHeight=50
+    Cx,Cy=win_dime/3,win_dime/3 #<- 3rd  button's x & y
+
+    B1 = ttk.Button(top, text ="Put Substitutions", command = Button_gen)
+    B2 = ttk.Button(top, text ="Reset TeachersData.csv", command =Button_fn2)
+    B3 = ttk.Button(top, text ="Reset ClassesData.csv", command =Button_fn3)
+
+    B1.place(x=Cx,y=Cy-space,  height=BHeight)
+    B2.place(x=Cx,y=Cy,  height=BHeight)
+    B3.place(x=Cx,y=Cy+space, height=BHeight)
+    top.mainloop()
+# startTK()
 # B2 = Button(top, text ="Reset teach csv", command =lambda:ConvertToCSVTeach('C:/Users/radin/Documents/Adi light/Code/school-time-table/csv/','TeachersData',['subj','classes','Leave']))
+
+
+
+###FEATURES
+#1. Drop down to add the laeve teachers and the days one by one
+#2. Drop down to fetch only the required teachers details and display it either in the Tkinter or cmd
