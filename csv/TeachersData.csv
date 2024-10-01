@@ -1,13 +1,13 @@
 TEACHERS,subj,classes,Leave
-sowmiya,M,"['A12', 'C12']","['M', 'TH', 'F']"
-gayatri_vp,B,['C12'],[]
+sowmiya,M,"['A12', 'C12']",['M']
+gayatri_vp,B,['C12'],['T']
 divya,P,"['C12', 'B12']",[]
 janani,C,['C12'],[]
-gayathri_narashiman,E,['C12'],[]
+gayathri_narashiman,E,['C12'],['M']
 ellamal,PT,"['C12', 'B12']",[]
 saraswathi,LIB,"['C12', 'A12', 'B12']",[]
 cvr,E,['A12'],[]
 aruna,M,['B12'],[]
 sripriya,P,['A12'],[]
 buvaneshwari_g,CS,"['A12', 'B12']",[]
-gayatri_ramachandran,C,"['A12', 'B12']",['M']
+gayatri_ramachandran,C,"['A12', 'B12']",[]

@@ -1,21 +1,21 @@
 Class:,A12
-M,janani,sripriya,sripriya,aruna,cvr,CS ,LAB1 ,LAB1
+M,gayatri_ramachandran,sripriya,sripriya,aruna,cvr,CS ,LAB1 ,LAB1
 T,sowmiya,sripriya,gayatri_ramachandran,gayatri_ramachandran,cvr,CS ,LAB1 ,LAB1
 W,CS ,sripriya,sowmiya,sowmiya,cvr,gayatri_ramachandran,LAB3 ,LAB3
-TH,CS ,sripriya,saraswathi,cvr,aruna,gayatri_ramachandran,LAB3 ,LAB3
-F,CS ,sripriya,cvr,PT ,gayatri_ramachandran,gayatri_ramachandran,buvaneshwari_g,sowmiya
+TH,CS ,sripriya,sowmiya,cvr,sowmiya,gayatri_ramachandran,LAB3 ,LAB3
+F,CS ,sripriya,cvr,PT ,gayatri_ramachandran,gayatri_ramachandran,buvaneshwari_g
 S,LIB ,sripriya,sowmiya,CS ,cvr
 Class:,B12
-M,aruna,E,divya,buvaneshwari_g,divya,ellamal,LAB3,LAB3
+M,aruna,E,divya,buvaneshwari_g,gayatri_ramachandran,gayatri_ramachandran,LAB3,LAB3
 T,divya,aruna,buvaneshwari_g,E,buvaneshwari_g,aruna,LAB3,LAB3
 W,gayatri_ramachandran,aruna,buvaneshwari_g,buvaneshwari_g,divya,E,E,gayatri_ramachandran
 TH,E,gayatri_ramachandran,aruna,divya,saraswathi,buvaneshwari_g,ellamal,gayatri_ramachandran
 F,divya,aruna,buvaneshwari_g,aruna,GS,divya,LAB1,LAB1
 S,divya,gayatri_ramachandran,E,LAB1,LAB1
 Class:,C12
-M,divya,gayatri_vp,janani,saraswathi,janani,gayatri_vp,gayathri_narashiman,ellamal
-T,janani,gayatri_vp,GS,divya,sowmiya,gayathri_narashiman,janani,sowmiya
+M,divya,gayatri_vp,janani,saraswathi,janani,gayatri_vp,divya,ellamal
+T,janani,gayathri_narashiman,GS,divya,sowmiya,gayathri_narashiman,janani,sowmiya
 W,divya,gayatri_vp,gayathri_narashiman,janani,sowmiya,divya,LAB1,LAB1
-TH,divya,gayatri_vp,gayathri_narashiman,janani,divya,gayatri_vp,LAB,LAB
-F,janani,gayatri_vp,divya,gayathri_narashiman,janani,gayatri_vp,LAB2,LAB2
+TH,sowmiya,gayatri_vp,gayathri_narashiman,janani,divya,gayatri_vp,LAB,LAB
+F,janani,gayatri_vp,divya,gayathri_narashiman,janani,sowmiya,LAB2,LAB2
 S,sowmiya,divya,gayathri_narashiman,LAB2,LAB2

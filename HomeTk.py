@@ -1,19 +1,19 @@
 import tkinter as tk
 from tkinter import ttk
 from tkinter import messagebox
-from timeTable import ConvertFromCSVTeach,Button_gen
+from timeTable import ConvertFromCSVTeach,Button_gen,give_pdf_path,csv_to_pdf_SubClasses,give_pdf_paths
 import csv
 # Function to display the download page after generating the output
 teach_csv_data=ConvertFromCSVTeach('./csv/','TeachersData')
 Teachers_names=list(teach_csv_data.keys())
-print(Teachers_names)
+# print(Teachers_names)
 ##TODO:
 #--Gen list of teachers 
 #--Convert MONDAY--> M
 #--draft and add to the teachers csv
 #--using tk inputs add leave_day to the csv file
 #--call generate function
-#convert csv->pdf
+#--convert csv->pdf
 #download
 
 def show_download_page():
@@ -34,17 +34,36 @@ def show_download_page():
 
 # Simulating a download action when the download button is clicked
 def download_action():
+    #sub class pdf
+    # subclass_csv_path='./csv/Final Subs/SubsClassesData.csv' 
+    # subclass_pdf_path=give_pdf_path()
+    # csv_to_pdf_SubClasses(subclass_csv_path,subclass_pdf_path)
+    sub_csv_paths=['./csv/Final Subs/SubsClassesData.csv','./csv/Final Subs/SubsDailyTeachersData.csv'] 
+    sub_pdf_paths=give_pdf_paths(sub_csv_paths)
+    for i in range(len(sub_pdf_paths)):
+        csv_to_pdf_SubClasses(sub_csv_paths[i],sub_pdf_paths[i])
 
     messagebox.showinfo("Download", "Report has been downloaded!")
-def addLeavedaystoCSV(folderPath,fileName,SelectedteachName,leaveday):
+def addLeavedaystoCSV(folderPath,fileName,SelectedteachName,Unformattedleaveday):
     csv_file=folderPath+fileName+'.csv'
     NewCsvrows=[]
+    leaveday=Unformattedleaveday[0] if Unformattedleaveday!="Thursday" else Unformattedleaveday[:2].upper()
+
     with open(csv_file,'r+',newline='') as fc:
         Mrreader=csv.reader(fc)
-        for data in Mrreader:
-            if data[0]==SelectedteachName:
-                
+        for i,data in enumerate(Mrreader):
+            if i == 0: 
+                NewCsvrows.append(data)
+                continue  # Skip the first iteration
+            if data[0]==SelectedteachName and leaveday not in eval(data[3]):
+                # print(eval(data[3]))
                 NewCsvrows.append(data[:3]+[str(eval(data[3])+[leaveday])] )
+                result_label.config(text=f'Drafted:\nSubstitute Teacher: {SelectedteachName}\nDay: {Unformattedleaveday}')
+
+            elif leaveday in eval(data[3]):
+                print('The same input has alreaady been drafted')
+                NewCsvrows.append(data)
+                result_label.config(text=f'The same input has alreaady been drafted')
             else:
                 NewCsvrows.append(data)
         fc.seek(0)
@@ -57,31 +76,34 @@ def addtoCSV():
     selected_teacher = teacher_var.get()
     selected_day = day_var.get()
     if selected_teacher and selected_day:
-        formatted_selected_day=selected_day[0] if selected_day!="Thursday" else selected_day[:2].upper()
-        addLeavedaystoCSV('./csv/','TeachersData',selected_teacher,formatted_selected_day)
+        addLeavedaystoCSV('./csv/','TeachersData',selected_teacher,selected_day)
+
 # Function to display loading screen and then show the result
 def display_loading_and_generate():
     # Show the loading window
     show_loading_window()
 
     # After 2 seconds, close the loading screen, generate the output, and then show the download page
-    root.after(2000, generate_substitution)
+    # root.after(2000, generate_substitution)
+    generate_substitution()
 
 # Function to generate output based on selections
 def generate_substitution():
     selected_teacher = teacher_var.get()
     selected_day = day_var.get()
-    formatted_selected_day=selected_day[0] if selected_day!="Thursday" else selected_day[:2].upper()
+    if selected_day:
+        formatted_selected_day=selected_day[0] if selected_day!="Thursday" else selected_day[:2].upper()
+    else:
+        formatted_selected_day=None
     Button_gen()
     # Close the loading window
-    loading_window.destroy()
     
     # Check if both teacher and day are selected
     if selected_teacher and selected_day:
         result_label.config(text=f'Substitute Teacher: {selected_teacher}\nDay: {formatted_selected_day}')
-        show_download_page()
-    else:
-        messagebox.showwarning("Input Error", "Please select both a substitute teacher and a day.")
+    show_download_page()
+
+    loading_window.destroy()
 
 # Function to reset the selections and output
 def reset_fields():

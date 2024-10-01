@@ -1,9 +1,8 @@
-import json
 import csv
 from tkinter import *
-from tkinter import messagebox
+from tkinter import messagebox,filedialog
+import os
 from tkinter import ttk
-import pandas as pd
 import matplotlib.pyplot as plt
 from matplotlib.backends.backend_pdf import PdfPages
 
@@ -317,13 +316,17 @@ def csv_to_pdf_SubClasses(csv_file_path, pdf_file_path):
             if len(i)<4:
                 rowsToSkip.append(ci)
                 classNames.append(i[1])
+            elif len(i)<9:
+                #TEMP soln if number of rows is less than 9 then add till it becomess 9 ERR: at Friday of A12 with only 8 col
+                num_of_blankstoadd=9-len(i)
+                print("BLANKS",num_of_blankstoadd)
+                final_i=i+['']*num_of_blankstoadd
+                rows.append(final_i)
+                print(final_i,rows)
             else:
-                if 4<len(i)<9:
-                    rows.append([*i,'','',''])
-                else:
-                    rows.append(i)
+                rows.append(i)
             ci+=1
-    print(classNames,rowsToSkip,rows)
+    # print(classNames,rowsToSkip,rows)
 
     
     
@@ -331,27 +334,93 @@ def csv_to_pdf_SubClasses(csv_file_path, pdf_file_path):
     with PdfPages(pdf_file_path) as pdf:
         # Create the first figure for the first table
         for i in range(len(classNames)):
-            fig, ax= plt.subplots(figsize=(8, 6))  # Adjust size as needed
+            fig, ax= plt.subplots(figsize=(12, 8))  # Adjust size as needed
             ax.axis('tight')
             ax.axis('off')
-            
+            #[0...5,6...11,12...17]
             # Create the first table
             if i==0:
-                ax.table(cellText=rows[:5+1], colLabels=header, cellLoc='center', loc='center')
+                table=ax.table(cellText=rows[:5+1], colLabels=header, cellLoc='center', loc='center')
+                print(0,5)
             else:
-                st,en=i*5,5+i*5
-                ax.table(cellText=rows[st+1:en+2], colLabels=header, cellLoc='center', loc='center')
-          
+                days_cnt=6
+                st,en=i*days_cnt,5+i*days_cnt
+                print(st,en)
+                table=ax.table(cellText=rows[st:en+1], colLabels=header, cellLoc='center', loc='center')
+            # Style the table headers
+            for key, cell in table.get_celld().items():
+                cell.set_fontsize(12)  # Set font size
+                
+                if 0 in key:  # Header or margin/col row
+                    cell.set_fontsize(14)  # Larger font for headers
+                    cell.set_text_props(weight='bold')   # Bold font for headers
+                    cell.set_facecolor('lightgrey')  # Header background color
+                    cell.set_edgecolor('black')  # Black border for header
+                else:
+                    cell.set_fontsize(12)  # Normal font size for rows
+                    cell.set_edgecolor('grey')  # Grey border color for rows
 
-            ax.set_title(classNames[i], fontweight="bold")
+
+            ax.set_title(classNames[i],  fontdict={
+            'fontsize': 18,     # Title size
+            'fontweight': 'bold', # Title weight
+            'color': 'navy',     # Title color
+            'verticalalignment': 'top', # Align vertically
+        }, pad=10, backgroundcolor='lightyellow')
 
             # Save the first table to the PDF
             pdf.savefig(fig)
             plt.close(fig)  # Close the figure to free memory
 
       
-
     print(f"Successfully created a PDF with two tables from {csv_file_path} on separate pages.")
+    return pdf_file_path
+def give_pdf_path():
+    """Generates the PDF from a selected CSV file and saves it."""
+    # csv_file_path = filedialog.askopenfilename(filetypes=[("CSV files", "*.csv")])
+    # csv_file_path = './csv/Final Subs/SubsClassesData.csv' 
+    # default_pdf_name = os.path.splitext(os.path.basename(csv_file_path))[0] + ".pdf"
+        # Ask the user to select or create a folder for saving PDFs
+    
+    pdf_file_path = filedialog.asksaveasfilename(defaultextension=".pdf", filetypes=[("PDF files", "*.pdf")],initialfile="Default")
+    if not pdf_file_path:
+        print("User cancelled the dialog")
+        return  # User cancelled the dialog
+
+    try:
+        # csv_to_pdf_SubClasses(csv_file_path, pdf_file_path)
+        # messagebox.showinfo("Success", f"PDF generated successfully and saved to:\n{pdf_file_path}")
+        return pdf_file_path
+    except Exception as e:
+        messagebox.showerror("Error", f"An error occurred: {str(e)}")
+def give_pdf_paths(csv_file_paths):
+    """Generates the PDF from a selected CSV file and saves it."""
+    # csv_file_path = filedialog.askopenfilename(filetypes=[("CSV files", "*.csv")])
+    # csv_file_path = './csv/Final Subs/SubsClassesData.csv' 
+    # default_pdf_name = os.path.splitext(os.path.basename(csv_file_path))[0] + ".pdf"
+        # Ask the user to select or create a folder for saving PDFs
+    folder_path = filedialog.askdirectory()
+    if not folder_path:
+        return  # User cancelled the folder selection
+    # Create the "PDF_Files" folder inside the selected folder, if it doesn't exist
+    pdf_folder_path = os.path.join(folder_path, "PDF_Files")
+    if not os.path.exists(pdf_folder_path):
+        os.makedirs(pdf_folder_path)
+    else:
+        print("folder already exists")
+    pdf_paths=[]
+    for csv_file_path in csv_file_paths:
+            try:
+                # Default PDF name based on the CSV file name
+                default_pdf_name = os.path.splitext(os.path.basename(csv_file_path))[0] + ".pdf"
+
+                # Full path where the PDF will be saved inside the created folder
+                pdf_file_path = os.path.join(pdf_folder_path, default_pdf_name)
+                pdf_paths.append(pdf_file_path)
+                # Generate the PDF and save it inside the folder
+            except Exception as e:
+                messagebox.showerror("Error", f"An error occurred with file {csv_file_path}: {str(e)}")
+    return pdf_paths
 
 #TK fns
 def Button_gen():
