@@ -1,1 +1,4 @@
+.gitignore
 /test.py
+/__pycache__
+/.venv
